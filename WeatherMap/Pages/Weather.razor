@@ -1,73 +1,85 @@
-﻿@page "/weather"
+﻿@page "/Weather"
 @inject HttpClient Http
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>Wetter</PageTitle>
 
-<h1>Weather</h1>
-
-<p>This component demonstrates fetching data from the server.</p>
+<h1>Wetter</h1>
+<p>Hier ist eine Komponente, die das Abrufen von Daten vom Server demonstriert:</p>
 
 @if (geoData == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Lade Daten...</em></p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Nr.</th>
+                <th>Stadt</th>
+                <th>Breitengrad</th>
+                <th>Längengrad</th>
+                <th>Land</th>
+                <th>Bundesland</th>
+                <th>Region</th>
+                <th>Bezirk</th>
+                <th>Gemeinde</th>
             </tr>
         </thead>
         <tbody>
-            @* @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            } *@
+            @{ 
+                int counterOne = 1;
+            }
             @foreach (var geo in geoData)
             {
                 <tr>
-                    <td>@geo.name</td>
-                    <td>@geo.latitude</td>
-                    <td>@geo.longitude</td>
-                    <td>@geo.country</td>
-                    <td>@geo.admin1</td>
-                    <td>@geo.admin2</td>
-                    <td>@geo.admin3</td>
-                    <td>@geo.admin4</td>
+                    <td>@counterOne</td>
+                    <td>@geo.Name</td>
+                    <td>@geo.Latitude</td>
+                    <td>@geo.Longitude</td>
+                    <td>@geo.Country</td>
+                    <td>@geo.Admin1</td>
+                    <td>@geo.Admin2</td>
+                    <td>@geo.Admin3</td>
+                    <td>@geo.Admin4</td>
                 </tr>
+                counterOne++;
+            }
+        </tbody>
+    </table>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nr.</th>
+                <th>Temperatur</th>
+                <th>Luftfeuchtigkeit</th>
+                <th>Tages Durchschnitsstemperatur</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int counterTwo = 1;
+            }
+            @foreach (var geo in geoData)
+            {
+                <tr>
+                    <td>@counterTwo</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                counterTwo++;
             }
         </tbody>
     </table>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
     private GeoData[]? geoData;
 
     protected override async Task OnInitializedAsync()
     {
         geoData = await new IndexModel().GetGeoData();
-
-        // forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
-    }
-
-    public class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-
-        public int TemperatureC { get; set; }
-
-        public string? Summary { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }
 }

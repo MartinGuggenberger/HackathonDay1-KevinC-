@@ -12,26 +12,20 @@
 
         }
 
-
         public async Task<GeoData[]?> GetGeoData()
         {
-            string city = "Rosenheim";
-            string postalCode = "83024";
             string geocodingUrl = $"https://geocoding-api.open-meteo.com/v1/search?name=Rosenheim&count=10&language=de&format=json";
-
             using HttpClient client = new HttpClient();
             HttpResponseMessage geocodingResponse = await client.GetAsync(geocodingUrl);
             geocodingResponse.EnsureSuccessStatusCode();
             string geocodingResponseBody = await geocodingResponse.Content.ReadAsStringAsync();
             GeoResult? test = await geocodingResponse.Content.ReadFromJsonAsync<GeoResult>();
-
-            return test?.results;
+            
+            return test?.Results;
         }
 
-            public async Task OnGet()
+        public async Task OnGet()
         {
-            string city = "Rosenheim";
-            string postalCode = "83024";
             string geocodingUrl = $"https://geocoding-api.open-meteo.com/v1/search?name=Rosenheim&count=1&language=de&format=json";
 
             using HttpClient client = new HttpClient();
@@ -39,9 +33,6 @@
             geocodingResponse.EnsureSuccessStatusCode();
             string geocodingResponseBody = await geocodingResponse.Content.ReadAsStringAsync();
             GeoResult? test = await geocodingResponse.Content.ReadFromJsonAsync<GeoResult>();
-            
-            
-            Console.WriteLine(geocodingResponseBody);
 
             // Hier kannst du die Koordinaten aus der Antwort extrahieren und für den Wetter-API-Aufruf verwenden
             // Beispiel: latitude = 47.8561, longitude = 12.1225
@@ -56,19 +47,19 @@
 
     public class GeoResult
     {
-        public GeoData[] results { get; set; }
+        public GeoData[]? Results { get; set; }
     }
 
     public class GeoData
     {
-        public string name { get; set; }
-        public double latitude { get; set; }
-        public double longitude { get; set; }
-        public string country { get; set; }
-        public string admin1 { get; set; }
-        public string admin2 { get; set; }
-        public string admin3 { get; set; }
-        public string admin4 { get; set; }
+        public string? Name { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string? Country { get; set; }
+        public string? Admin1 { get; set; }
+        public string? Admin2 { get; set; }
+        public string? Admin3 { get; set; }
+        public string? Admin4 { get; set; }
     }
 
 }
