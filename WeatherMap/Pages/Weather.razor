@@ -7,7 +7,7 @@
 
 <p>This component demonstrates fetching data from the server.</p>
 
-@if (forecasts == null)
+@if (geoData == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -23,13 +23,26 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @* @foreach (var forecast in forecasts)
             {
                 <tr>
                     <td>@forecast.Date.ToShortDateString()</td>
                     <td>@forecast.TemperatureC</td>
                     <td>@forecast.TemperatureF</td>
                     <td>@forecast.Summary</td>
+                </tr>
+            } *@
+            @foreach (var geo in geoData)
+            {
+                <tr>
+                    <td>@geo.name</td>
+                    <td>@geo.latitude</td>
+                    <td>@geo.longitude</td>
+                    <td>@geo.country</td>
+                    <td>@geo.admin1</td>
+                    <td>@geo.admin2</td>
+                    <td>@geo.admin3</td>
+                    <td>@geo.admin4</td>
                 </tr>
             }
         </tbody>
@@ -38,10 +51,13 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    private GeoData[]? geoData;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        geoData = await new IndexModel().GetGeoData();
+
+        // forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
     }
 
     public class WeatherForecast
