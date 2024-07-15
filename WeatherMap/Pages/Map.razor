@@ -1,0 +1,179 @@
+﻿@page "/map"
+@using System.ComponentModel
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Map</PageTitle>
+
+<h1>Map</h1>
+<h3>Städte hinzufügen</h3>
+
+@* City-Inputboxes *@
+@foreach (var city in Cities)
+{
+    <div>
+        <input @bind="city.Name" @bind:event="oninput" @onkeypress="(e) => OnInputKeyPress(e, city)" placeholder="Stadtname" />
+        @if (Cities.Count > 1)
+        {
+            <button class="btn-danger" @onclick="() => RemoveCity(city)">🗑</button>
+        }
+    </div>
+}
+<button @onclick="AddCity">+</button>
+<button @onclick="UpdateMap">Karte aktualisieren</button>
+
+@* Map-Container *@
+<div id="map" style="height: 500px;"></div>
+
+@* City-Selection *@
+@if (ShowModal)
+{
+    <div class="modal-backdrop"></div>
+    <div class="modal">
+        <div class="modal-content">
+            <h3>Stadt auswählen</h3>
+            <select @bind="SelectedGeoDataString">
+                @foreach (var geoData in GeoDataOptions)
+                {
+                    <option value="@geoDataString(geoData)">@geoData.Name, @geoData.PostalCodes?.FirstOrDefault(), @geoData.Country, @geoData.Admin1, @geoData.Admin2, @geoData.Admin3, @geoData.Admin4,</option>
+                    
+                }
+            </select>
+            <button @onclick="ConfirmSelection">Bestätigen</button>
+        </div>
+    </div>
+}
+
+@code {
+    public class City(string name)
+    {
+        public string Name { get; set; } = name;
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public WeatherData? WeatherData { get; set; }
+    }
+
+    public class Marker
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string? PopupContent { get; set; }
+    }
+
+    public class Location
+    {
+        public string Name { get; set; }
+        public string PostalCode { get; set; }
+        public string Country { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
+
+    //debug:
+    //private List<City> Cities { get; set; } = new List<City> { new City("Suhl"), new City("Rosenheim") };
+    private List<City> Cities { get; set; } = new List<City> { new City("")};
+    private List<Marker> Markers { get; set; } = new List<Marker>();
+    private bool ShowModal { get; set; } = false;
+    private List<GeoData> GeoDataOptions { get; set; } = new List<GeoData>();
+    private GeoData SelectedGeoData { get; set; }
+    private string SelectedGeoDataString { get; set; }
+
+    private void AddCity()
+    {
+        Cities.Add(new City(""));
+    }
+
+    private void RemoveCity(City city)
+    {
+        Cities.Remove(city);
+    }
+
+    private void OnInputKeyPress(KeyboardEventArgs e, City city)
+    {
+        if (e.Key == "Enter")
+        {
+            AddCity();
+        }
+    }
+
+    private void ConfirmSelection()
+    {
+        OnGeoDataSelected(SelectedGeoDataString);
+
+        var city = Cities.Where(c => c.Name.Equals(SelectedGeoData.Name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+        if (city!=null)
+        {
+            city.Latitude = SelectedGeoData.Latitude;
+            city.Longitude = SelectedGeoData.Longitude;
+        }
+        ShowModal = false;
+        StateHasChanged();
+        UpdateMap();
+    }
+
+    private async Task UpdateMap()
+    {
+        Markers.Clear();
+
+        foreach (var city in Cities)
+        {
+            if (city.Latitude== null || city.Longitude == null)
+            {
+                var geoData = await MeteoApi.GetGeoData(city.Name, 10);
+                if (geoData?.Length > 1)
+                {
+                    GeoDataOptions = geoData.Where(g=>g.Name.Equals(city.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+                    SelectedGeoData = GeoDataOptions.First();
+                    SelectedGeoDataString = geoDataString(SelectedGeoData);
+                    ShowModal = true;
+                    StateHasChanged();
+                    return;
+                }
+                else if (geoData?.Length == 1)
+                {
+                    var selectedGeoData = geoData.First();
+                    city.Latitude = selectedGeoData.Latitude;
+                    city.Longitude = selectedGeoData.Longitude;
+                }
+            }
+
+            if (city.Latitude == null || city.Longitude == null)
+            {
+                return;
+            }
+
+            if (city.WeatherData == null)
+            {
+                city.WeatherData = await MeteoApi.GetWeatherDataTest2(city.Latitude.Value, city.Longitude.Value);
+                
+            }
+
+            if (city.WeatherData == null )
+            {
+                return;
+            }
+
+            Markers.Add(new Marker
+                {
+                    Latitude = city.Latitude.Value,
+                    Longitude = city.Longitude.Value,
+                    PopupContent = $"{city.Name}<br>Aktuelle Temperatur: {city.WeatherData.current.temperature_2m}°C"
+                });
+        }
+
+        await JSRuntime.InvokeVoidAsync("leafletJsFunctions.initialize", Markers);
+    }
+    private string geoDataString(GeoData geoData)
+    {
+        var converter = TypeDescriptor.GetConverter(typeof(GeoData));
+        return converter.ConvertToString(geoData);
+    }
+
+    private void OnGeoDataSelected(string value)
+    {
+        var converter = TypeDescriptor.GetConverter(typeof(GeoData));
+        SelectedGeoData = (GeoData)converter.ConvertFromString(value);
+        SelectedGeoDataString = value;
+    }
+
+
+}

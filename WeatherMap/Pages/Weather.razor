@@ -1,4 +1,4 @@
-﻿@page "/Weather"
+﻿@page "/weather"
 @inject HttpClient Http
 
 <PageTitle>Wetter</PageTitle>
@@ -52,8 +52,10 @@ else
         <thead>
             <tr>
                 <th>Nr.</th>
-                <th>Temperatur</th>
-                <th>Luftfeuchtigkeit</th>
+                <th>Current Temperatur</th>
+                <th>Current Luftfeuchtigkeit</th>
+                <th>Daily Temperatur Min</th>
+                <th>Daily Temperatur Max</th>
                 <th>Tages Durchschnitsstemperatur</th>
             </tr>
         </thead>
@@ -61,25 +63,27 @@ else
             @{
                 int counterTwo = 1;
             }
-            @foreach (var geo in geoData)
-            {
-                <tr>
-                    <td>@counterTwo</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                counterTwo++;
-            }
+
+            <tr>
+                <td>@counterTwo</td>
+                <td>@weatherData?.current?.temperature_2m</td>
+                <td>@weatherData?.current?.relative_humidity_2m</td>
+                <td>@weatherData?.daily?.temperature_2m_min?.FirstOrDefault()</td>
+                <td>@weatherData?.daily?.temperature_2m_max?.FirstOrDefault()</td>
+                <td></td>
+            </tr>
+            
         </tbody>
     </table>
 }
 
 @code {
     private GeoData[]? geoData;
+    private WeatherData? weatherData;
 
     protected override async Task OnInitializedAsync()
     {
-        geoData = await new IndexModel().GetGeoData();
+        geoData = await MeteoApi.GetGeoData("Rosenheim", 10);
+        weatherData = await MeteoApi.GetWeatherDataTest2(47.8561, 12.1225);
     }
 }
