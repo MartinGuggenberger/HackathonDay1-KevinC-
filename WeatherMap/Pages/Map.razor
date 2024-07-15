@@ -115,7 +115,7 @@
     {
         Markers.Clear();
 
-        foreach (var city in Cities)
+        foreach (var city in Cities.Where(c=>!string.IsNullOrWhiteSpace(c.Name)))
         {
             if (city.Latitude== null || city.Longitude == null)
             {
