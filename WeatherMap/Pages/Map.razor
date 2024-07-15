@@ -102,6 +102,7 @@
         var city = Cities.Where(c => c.Name.Equals(SelectedGeoData.Name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
         if (city!=null)
         {
+            city.Name = SelectedGeoData.Name;
             city.Latitude = SelectedGeoData.Latitude;
             city.Longitude = SelectedGeoData.Longitude;
         }
@@ -124,6 +125,7 @@
                 if (geoData?.Count == 1)
                 {
                     var selectedGeoData = geoData.First();
+                    city.Name = selectedGeoData.Name;
                     city.Latitude = selectedGeoData.Latitude;
                     city.Longitude = selectedGeoData.Longitude;
                 }
@@ -158,7 +160,7 @@
                 {
                     Latitude = city.Latitude.Value,
                     Longitude = city.Longitude.Value,
-                    PopupContent = $"{city.Name}<br>Aktuelle Temperatur: {city.WeatherData.current.temperature_2m}°C"
+                    PopupContent = $"Stadtname: {city.Name}<br>Aktuelle Temperatur: {city.WeatherData.current.temperature_2m}°C<br>Gefühlte Temperatur: {city.WeatherData.current.apparent_temperature}°C<br>Aktuelle Luftfeuchtigkeit: {city.WeatherData.current.relative_humidity_2m}%<br>Aktuelle Windgeschwindigkeit: {city.WeatherData.current.wind_speed_10m}km/h"
                 });
         }
 

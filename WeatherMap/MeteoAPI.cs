@@ -26,7 +26,7 @@
 
         public static async Task<WeatherData?> GetWeatherDataTest2(double latitude, double longitude)
         {
-            return await GetWeatherData(latitude, longitude, "current=temperature_2m,relative_humidity_2m&hourly=temperature_2m,rain,showers,snowfall&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin&forecast_days=1");
+            return await GetWeatherData(latitude, longitude, "current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m&hourly=temperature_2m,rain,showers,snowfall&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin&forecast_days=1");
         }
 
         public static async Task<WeatherData?> GetWeatherData(double latitude, double longitude, string weatherParams)
@@ -89,8 +89,9 @@
         public DateTime time { get; set; }
         public double temperature_2m { get; set; }
         public double relative_humidity_2m { get; set; }
+        public double apparent_temperature { get; set; }
+        public double wind_speed_10m { get; set; }
     }
-
     public class GeoDataTypeConverter : TypeConverter
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
