@@ -1,4 +1,4 @@
-﻿@page "/map"
+﻿@page "/"
 @using System.ComponentModel
 @inject IJSRuntime JSRuntime
 
@@ -69,7 +69,7 @@
     }
 
     //debug:
-    //private List<City> Cities { get; set; } = new List<City> { new City("Suhl"), new City("Rosenheim") };
+    //private List<City> Cities { get; set; } = new List<City> { new City("Berlin"), new City("Athen") };
     private List<City> Cities { get; set; } = new List<City> { new City("")};
     private List<Marker> Markers { get; set; } = new List<Marker>();
     private bool ShowModal { get; set; } = false;
@@ -118,21 +118,23 @@
         {
             if (city.Latitude== null || city.Longitude == null)
             {
-                var geoData = await MeteoApi.GetGeoData(city.Name, 10);
-                if (geoData?.Length > 1)
+                var geoDataRaw = await MeteoApi.GetGeoData(city.Name, 10);
+                var geoData = geoDataRaw.Where(g => g.Name.Contains(city.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+
+                if (geoData?.Count == 1)
                 {
-                    GeoDataOptions = geoData.Where(g=>g.Name.Equals(city.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+                    var selectedGeoData = geoData.First();
+                    city.Latitude = selectedGeoData.Latitude;
+                    city.Longitude = selectedGeoData.Longitude;
+                }
+                else if (geoData?.Count > 1)
+                {
+                    GeoDataOptions = geoData;
                     SelectedGeoData = GeoDataOptions.First();
                     SelectedGeoDataString = geoDataString(SelectedGeoData);
                     ShowModal = true;
                     StateHasChanged();
                     return;
-                }
-                else if (geoData?.Length == 1)
-                {
-                    var selectedGeoData = geoData.First();
-                    city.Latitude = selectedGeoData.Latitude;
-                    city.Longitude = selectedGeoData.Longitude;
                 }
             }
 

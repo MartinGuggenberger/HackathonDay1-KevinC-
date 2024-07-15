@@ -3,8 +3,8 @@
 
 <PageTitle>Wetter</PageTitle>
 
-<h1>Wetter</h1>
-<p>Hier ist eine Komponente, die das Abrufen von Daten vom Server demonstriert:</p>
+<h1>Wetter - Spielwiese</h1>
+<p>Spielwiese zum ausprobieren von Funktionen:</p>
 
 @if (geoData == null)
 {
@@ -83,7 +83,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        geoData = await MeteoApi.GetGeoData("Rosenheim", 10);
-        weatherData = await MeteoApi.GetWeatherDataTest2(47.8561, 12.1225);
+        geoData = await MeteoApi.GetGeoData("Berlin", 5);
+        if (geoData?.FirstOrDefault() is GeoData data)
+        {
+            weatherData = await MeteoApi.GetWeatherDataTest2(data.Latitude, data.Longitude);
+        }
     }
 }
